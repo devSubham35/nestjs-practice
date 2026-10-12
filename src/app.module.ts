@@ -1,10 +1,32 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
+import { APP_GUARD } from '@nestjs/core';
 import { AppService } from './app.service';
+import { ConfigModule } from '@nestjs/config';
+import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
+import { AppController } from './app.controller';
+import { MongooseModule } from '@nestjs/mongoose';
+import { AuthGuard } from './auth/guards/auth.guard';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 
 @Module({
-  imports: [],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: ".env" }),
+    UserModule, 
+    AuthModule,
+    MongooseModule.forRoot(process.env.MONGODB_URL!),
+  ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: AuthGuard },
+  ],
 })
-export class AppModule {}
+
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LoggerMiddleware)
+      .forRoutes('*');
+  }
+}
