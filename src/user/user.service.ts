@@ -14,7 +14,7 @@ export class UserService {
     async findByEmail(email: string) {
         try {
             return await this.userModel.findOne({ email }).exec()
-    
+
         } catch (error) {
             throw new BadRequestException("User not found")
         }
@@ -43,7 +43,12 @@ export class UserService {
     }
 
     /// Find user by email
-    async getAllUsers() {
-        return await this.userModel.find()
+    async getAllUsers(name?: string) {
+
+        const filter = name
+            ? { name: { $regex: name, $options: 'i' } }
+            : {};
+
+        return await this.userModel.find(filter)
     }
 }
