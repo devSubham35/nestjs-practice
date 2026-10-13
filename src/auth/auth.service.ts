@@ -1,6 +1,8 @@
 import bcrypt from "bcrypt"
 import { UserService } from 'src/user/user.service';
 import { SignInDto, SignUpDto } from './dto/auth.dto';
+import { UserDocument } from "src/user/schemas/userSchema";
+import { AuthenticatedUser } from "src/common/common.types";
 import { TokenService } from './../common/services/token.service';
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 
@@ -13,6 +15,18 @@ export class AuthService {
     private readonly tokenService: TokenService,
   ) { }
 
+  /// Format user response without password
+  private toTokenPayload(user: UserDocument): AuthenticatedUser {
+    return {
+      sub: user._id.toString(),
+      email: user.email,
+      roles: user.roles,
+      isActive: user.isActive,
+      isVerified: user.isVerified,
+    };
+  }
+
+  /// Signup Service
   async signup(signupDto: SignUpDto) {
 
     const isExistingUser = await this.userService.findByEmail(signupDto.email)
@@ -28,8 +42,10 @@ export class AuthService {
       password: hashedPassword
     })
 
-    const payload = { sub: user._id, email: user.email }
-    const accessToken = await this.tokenService.generateToken(payload)
+
+    const accessToken = await this.tokenService.generateToken(
+      this.toTokenPayload(user)
+    )
 
     return {
       data: { user, accessToken },
@@ -37,7 +53,7 @@ export class AuthService {
     }
   }
 
-
+  /// Signin Service
   async signin(signinDto: SignInDto) {
 
     const existingUser = await this.userService.findByEmail(signinDto.email)
@@ -52,18 +68,20 @@ export class AuthService {
       throw new BadRequestException("Invalid credentials")
     }
 
-    const { password, ...user } = existingUser
+    const { password, ...userResponse } = existingUser.toObject();
 
-    const payload = { sub: String(existingUser._id), email: existingUser.email }
-    const accessToken = await this.tokenService.generateToken(payload)
+    const accessToken = await this.tokenService.generateToken(
+      this.toTokenPayload(existingUser)
+    )
 
     return {
-      data: { user, accessToken },
+      data: { user: userResponse, accessToken },
       message: "Signup Successfully"
     }
 
   }
 
+  /// User profile service
   async profile(id: string) {
     const user = await this.userService.findById(id)
 
