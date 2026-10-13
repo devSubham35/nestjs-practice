@@ -2,7 +2,7 @@ import { UserService } from './user.service';
 import { ROLES } from 'src/common/common.types';
 import { RolesGuard } from 'src/auth/guards/role.guard';
 import { Roles } from 'src/common/decorator/roles.decorator';
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Param, UseGuards } from '@nestjs/common';
 
 @Controller('users')
 export class UserController {
@@ -22,6 +22,7 @@ export class UserController {
     @Get("/:id")
     async getUserById(@Param("id") id: string){
         const user = await this.userService.findById(id)
+
         return {
             data: user,
             message: "User fetched successfully"
