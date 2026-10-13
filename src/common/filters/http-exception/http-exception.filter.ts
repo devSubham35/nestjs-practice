@@ -21,7 +21,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     const success = statusCode >= 200 && statusCode < 300;
 
-    let message: string | string[] = 'Internal server error';
+    let message: string | string[] = "Internal server error";
 
     if (exception instanceof HttpException) {
 
@@ -30,9 +30,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
       if (typeof exceptionResponse === 'string') {
         message = exceptionResponse;
       } else if (
-        typeof exceptionResponse === 'object' &&
-        exceptionResponse !== null &&
-        'message' in exceptionResponse
+        exceptionResponse !== null
+        && "message" in exceptionResponse
+        && typeof exceptionResponse === "object"
       ) {
         const exceptionMessage = exceptionResponse.message;
 
