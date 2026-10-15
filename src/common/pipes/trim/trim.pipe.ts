@@ -1,10 +1,8 @@
-import { ArgumentMetadata, BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
-
+import { BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
 
 @Injectable()
-export class TrimPipe2 implements PipeTransform {
-  transform(value: unknown, metadata: ArgumentMetadata) {
-
+export class TrimPipe implements PipeTransform {
+  transform(value: unknown) {
     if (value === undefined || value === null) {
       throw new BadRequestException('Name is required');
     }
@@ -22,4 +20,3 @@ export class TrimPipe2 implements PipeTransform {
     return trimmedValue;
   }
 }
-

@@ -4,7 +4,7 @@ import { RolesGuard } from 'src/auth/guards/role.guard';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { Public } from 'src/common/decorator/public.decorator';
-import { TrimPipe2 } from 'src/common/pipes/trim/trim.pipe';
+import { TrimPipe } from 'src/common/pipes/trim/trim.pipe';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -43,7 +43,7 @@ export class UserController {
       USER_EXAMPLE,
     ]),
   })
-  async getAllUsers(@Query('name', TrimPipe2) name: string) {
+  async getAllUsers(@Query('name', TrimPipe) name: string) {
     const users = await this.userService.getAllUsers(name);
     return {
       data: users,

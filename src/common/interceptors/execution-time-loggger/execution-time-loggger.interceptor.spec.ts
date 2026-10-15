@@ -1,7 +1,7 @@
-import { ExecutionTimeLogggerInterceptor } from './execution-time-loggger.interceptor';
+import { ExecutionTimeLoggerInterceptor } from './execution-time-loggger.interceptor';
 
-describe('ExecutionTimeLogggerInterceptor', () => {
+describe('ExecutionTimeLoggerInterceptor', () => {
   it('should be defined', () => {
-    expect(new ExecutionTimeLogggerInterceptor()).toBeDefined();
+    expect(new ExecutionTimeLoggerInterceptor()).toBeDefined();
   });
 });
