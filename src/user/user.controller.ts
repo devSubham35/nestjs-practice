@@ -43,7 +43,7 @@ export class UserController {
       USER_EXAMPLE,
     ]),
   })
-  async getAllUsers(@Query('name', TrimPipe) name: string) {
+  async getAllUsers(@Query('name', TrimPipe) name?: string) {
     const users = await this.userService.getAllUsers(name);
     return {
       data: users,

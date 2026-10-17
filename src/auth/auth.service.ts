@@ -1,19 +1,21 @@
-import bcrypt from "bcrypt"
+import bcrypt from 'bcrypt';
 import { UserService } from 'src/user/user.service';
 import { SignInDto, SignUpDto } from './dto/auth.dto';
-import { UserDocument } from "src/user/schemas/userSchema";
-import { AuthenticatedUser } from "src/common/common.types";
+import { UserDocument } from 'src/user/schemas/userSchema';
+import { AuthenticatedUser } from 'src/common/common.types';
 import { TokenService } from './../common/services/token.service';
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
-
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
-
   constructor(
     private readonly userService: UserService,
     private readonly tokenService: TokenService,
-  ) { }
+  ) {}
 
   /// Format user response without password
   private toTokenPayload(user: UserDocument): AuthenticatedUser {
@@ -28,71 +30,73 @@ export class AuthService {
 
   /// Signup Service
   async signup(signupDto: SignUpDto) {
-
-    const isExistingUser = await this.userService.findByEmail(signupDto.email)
+    const isExistingUser = await this.userService.findByEmail(signupDto.email);
 
     if (isExistingUser) {
-      throw new ConflictException("User already exist")
+      throw new ConflictException('User already exist');
     }
 
-    const hashedPassword = await bcrypt.hash(signupDto.password, 10)
+    const hashedPassword = await bcrypt.hash(signupDto.password, 10);
 
     const user = await this.userService.create({
       ...signupDto,
-      password: hashedPassword
-    })
-
+      password: hashedPassword,
+    });
 
     const accessToken = await this.tokenService.generateToken(
-      this.toTokenPayload(user)
-    )
+      this.toTokenPayload(user),
+    );
+    const userResponse = user.toObject();
+    Reflect.deleteProperty(userResponse, 'password');
 
     return {
-      data: { user, accessToken },
-      message: "Signup Successfully"
-    }
+      data: { user: userResponse, accessToken },
+      message: 'Signup Successfully',
+    };
   }
 
   /// Signin Service
   async signin(signinDto: SignInDto) {
-
-    const existingUser = await this.userService.findByEmail(signinDto.email)
+    const existingUser = await this.userService.findByEmail(signinDto.email);
 
     if (!existingUser) {
-      throw new BadRequestException("User not found")
+      throw new BadRequestException('User not found');
     }
 
-    const isPasswordMatched = await bcrypt.compare(signinDto.password, existingUser.password)
+    const isPasswordMatched = await bcrypt.compare(
+      signinDto.password,
+      existingUser.password,
+    );
 
     if (!isPasswordMatched) {
-      throw new BadRequestException("Invalid credentials")
+      throw new BadRequestException('Invalid credentials');
     }
 
-    const { password, ...userResponse } = existingUser.toObject();
+    const userResponse = existingUser.toObject();
+    Reflect.deleteProperty(userResponse, 'password');
 
     const accessToken = await this.tokenService.generateToken(
-      this.toTokenPayload(existingUser)
-    )
+      this.toTokenPayload(existingUser),
+    );
 
     return {
       data: { user: userResponse, accessToken },
-      message: "Signup Successfully"
-    }
-
+      message: 'Signin Successfully',
+    };
   }
 
   /// User profile service
   async profile(id: string) {
-    const user = await this.userService.findById(id)
+    const user = await this.userService.findById(id);
 
     if (!user) {
-      throw new BadRequestException("User not found")
+      throw new BadRequestException('User not found');
     }
-    const { password, ...passwordLessUser } = user
+    Reflect.deleteProperty(user, 'password');
 
     return {
-      data: passwordLessUser,
-      message: "Profile fetched succesfully"
-    }
+      data: user,
+      message: 'Profile fetched succesfully',
+    };
   }
 }

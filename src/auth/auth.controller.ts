@@ -51,7 +51,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Sign in and receive an access token' })
   @ApiCreatedResponse({
     description: 'Authentication succeeded.',
-    example: successResponse(201, 'Signup Successfully', {
+    example: successResponse(201, 'Signin Successfully', {
       user: USER_EXAMPLE,
       accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example.signature',
     }),

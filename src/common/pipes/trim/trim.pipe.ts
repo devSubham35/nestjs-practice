@@ -2,9 +2,9 @@ import { BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
 
 @Injectable()
 export class TrimPipe implements PipeTransform {
-  transform(value: unknown) {
+  transform(value: unknown): string | undefined {
     if (value === undefined || value === null) {
-      throw new BadRequestException('Name is required');
+      return undefined;
     }
 
     if (typeof value !== 'string') {
