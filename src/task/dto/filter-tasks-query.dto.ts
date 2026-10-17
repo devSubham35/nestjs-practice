@@ -1,8 +1,8 @@
 import { TASK_PRIORITY, TASK_STATUS } from '../task.types';
-import { IsArray, IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
+import { PaginationDto } from 'src/common/pagination/pagination.dto';
+import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
 
-export class FilterTasksQueryDto {
-  
+export class FilterTasksQueryDto extends PaginationDto {
   @IsOptional()
   @IsString()
   search?: string;
@@ -25,9 +25,9 @@ export class FilterTasksQueryDto {
 
   @IsOptional()
   @IsEnum(TASK_STATUS)
-  status?: TASK_STATUS
-  
+  status?: TASK_STATUS;
+
   @IsOptional()
   @IsEnum(TASK_PRIORITY)
-  priority?: TASK_PRIORITY
+  priority?: TASK_PRIORITY;
 }

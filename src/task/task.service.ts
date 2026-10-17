@@ -3,10 +3,20 @@ import { Task } from './schemas/task.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { CounterService } from './../counter/counter.service';
 import { ProjectService } from './../project/project.service';
+import { paginate } from 'src/common/pagination/pagination.utils';
 import { FilterTasksQueryDto } from './dto/filter-tasks-query.dto';
 import { buildFilter, getDateRange } from 'src/common/utils/common.utils';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateTaskServicePayload, DeleteTaskServicePayload, FilterPayloadType, UpdateTaskServicePayload } from './task.types';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import {
+  CreateTaskServicePayload,
+  DeleteTaskServicePayload,
+  FilterPayloadType,
+  UpdateTaskServicePayload,
+} from './task.types';
 
 @Injectable()
 export class TaskService {
@@ -14,7 +24,7 @@ export class TaskService {
     private readonly counterService: CounterService,
     private readonly projectService: ProjectService,
     @InjectModel(Task.name) private taskModel: Model<Task>,
-  ) { }
+  ) {}
 
   //////////////////////////////////////////////////////////
   /// Create Task Service
@@ -50,8 +60,7 @@ export class TaskService {
   /// Find all task under a project
   //////////////////////////////////////////////////////////
 
-  async findAll(projectId: string, filters: FilterTasksQueryDto = {}) {
-
+  async findAll(projectId: string, filters: FilterTasksQueryDto) {
     const project = await this.projectService.findOne({
       id: projectId,
     });
@@ -60,10 +69,20 @@ export class TaskService {
       throw new NotFoundException('Project not found');
     }
 
-    const { startDate, endDate, status, priority, dueStartDate, dueEndDate } = filters
+    const {
+      page = 1,
+      limit = 10,
+      status,
+      search,
+      endDate,
+      priority,
+      startDate,
+      dueEndDate,
+      dueStartDate,
+    } = filters;
 
-    const dateRange = getDateRange(startDate, endDate)
-    const dueDateRange = getDateRange(dueStartDate, dueEndDate)
+    const dateRange = getDateRange(startDate, endDate);
+    const dueDateRange = getDateRange(dueStartDate, dueEndDate);
 
     const filterPayload = buildFilter<FilterPayloadType>({
       status,
@@ -72,19 +91,26 @@ export class TaskService {
       dueDate: dueStartDate && dueEndDate ? dueDateRange : undefined,
     });
 
-    const tasks = await this.taskModel.find({
+    const filter = {
       ...filterPayload,
       projectId: project.data._id,
-      ...(filters.search && {
+      ...(search && {
         $or: [
-          { taskId: { $regex: filters.search, $options: 'i' } },
-          { title: { $regex: filters.search, $options: 'i' } },
+          { taskId: { $regex: search, $options: 'i' } },
+          { title: { $regex: search, $options: 'i' } },
         ],
       }),
-    });
+    };
+
+    const paginatedResult = await paginate(
+      this.taskModel.find(filter).sort({ createdAt: -1, _id: -1 }).lean(),
+      this.taskModel.countDocuments(filter),
+      page,
+      limit,
+    );
 
     return {
-      data: tasks,
+      ...paginatedResult,
       message: 'Task fetched successfully',
     };
   }
