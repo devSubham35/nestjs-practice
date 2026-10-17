@@ -1,18 +1,14 @@
 import { Model } from 'mongoose';
-import { Task } from './schemas/task.schema';
+
 import { InjectModel } from '@nestjs/mongoose';
+import { DateRangeType, getDateRange } from 'src/common/utils/common.utils';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+
+import { Task } from './schemas/task.schema';
 import { CounterService } from './../counter/counter.service';
 import { ProjectService } from './../project/project.service';
-import {
-  CreateTaskServicePayload,
-  DeleteTaskServicePayload,
-  UpdateTaskServicePayload,
-} from './task.types';
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { FilterTasksQueryDto } from './dto/filter-tasks-query.dto';
+import { CreateTaskServicePayload, DeleteTaskServicePayload, FilterPayloadType, TASK_PRIORITY, TASK_STATUS, UpdateTaskServicePayload } from './task.types';
 
 @Injectable()
 export class TaskService {
@@ -20,7 +16,7 @@ export class TaskService {
     private readonly counterService: CounterService,
     private readonly projectService: ProjectService,
     @InjectModel(Task.name) private taskModel: Model<Task>,
-  ) {}
+  ) { }
 
   //////////////////////////////////////////////////////////
   /// Create Task Service
@@ -56,7 +52,8 @@ export class TaskService {
   /// Find all task under a project
   //////////////////////////////////////////////////////////
 
-  async findAll(projectId: string) {
+  async findAll(projectId: string, filters: FilterTasksQueryDto = {}) {
+
     const project = await this.projectService.findOne({
       id: projectId,
     });
@@ -65,8 +62,38 @@ export class TaskService {
       throw new NotFoundException('Project not found');
     }
 
+    const filterPayload: FilterPayloadType = {}
+
+    const { startDate, endDate, status, priority, dueStartDate, dueEndDate } = filters
+
+    const dateRange = getDateRange(startDate, endDate)
+    const dueDateRange = getDateRange(dueStartDate, dueEndDate)
+
+    if (startDate && endDate) {
+      filterPayload.createdAt = dateRange
+    }
+
+    if (dueStartDate && dueEndDate) {
+      filterPayload.dueDate = dueDateRange
+    }
+
+    if (status) {
+      filterPayload.status = status
+    }
+
+    if (priority) {
+      filterPayload.priority = priority
+    }
+
     const tasks = await this.taskModel.find({
+      ...filterPayload,
       projectId: project.data._id,
+      ...(filters.search && {
+        $or: [
+          { taskId: { $regex: filters.search, $options: 'i' } },
+          { title: { $regex: filters.search, $options: 'i' } },
+        ],
+      }),
     });
 
     return {

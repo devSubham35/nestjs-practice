@@ -1,3 +1,4 @@
+import { DateRangeType } from "src/common/utils/common.utils";
 import { CreateTaskDto } from "./dto/create-task.dto";
 import { UpdateTaskDto } from "./dto/update-task.dto";
 
@@ -28,4 +29,12 @@ export interface UpdateTaskServicePayload {
 export interface DeleteTaskServicePayload {
     id: string
     projectId: string,
+}
+
+export interface FilterPayloadType {
+    search?: string
+    status?: TASK_STATUS
+    dueDate?: DateRangeType
+    priority?: TASK_PRIORITY
+    createdAt?: DateRangeType
 }
