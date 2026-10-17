@@ -1,14 +1,12 @@
 import { Model } from 'mongoose';
-
-import { InjectModel } from '@nestjs/mongoose';
-import { DateRangeType, getDateRange } from 'src/common/utils/common.utils';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-
 import { Task } from './schemas/task.schema';
+import { InjectModel } from '@nestjs/mongoose';
 import { CounterService } from './../counter/counter.service';
 import { ProjectService } from './../project/project.service';
 import { FilterTasksQueryDto } from './dto/filter-tasks-query.dto';
-import { CreateTaskServicePayload, DeleteTaskServicePayload, FilterPayloadType, TASK_PRIORITY, TASK_STATUS, UpdateTaskServicePayload } from './task.types';
+import { buildFilter, getDateRange } from 'src/common/utils/common.utils';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { CreateTaskServicePayload, DeleteTaskServicePayload, FilterPayloadType, UpdateTaskServicePayload } from './task.types';
 
 @Injectable()
 export class TaskService {
@@ -62,28 +60,17 @@ export class TaskService {
       throw new NotFoundException('Project not found');
     }
 
-    const filterPayload: FilterPayloadType = {}
-
     const { startDate, endDate, status, priority, dueStartDate, dueEndDate } = filters
 
     const dateRange = getDateRange(startDate, endDate)
     const dueDateRange = getDateRange(dueStartDate, dueEndDate)
 
-    if (startDate && endDate) {
-      filterPayload.createdAt = dateRange
-    }
-
-    if (dueStartDate && dueEndDate) {
-      filterPayload.dueDate = dueDateRange
-    }
-
-    if (status) {
-      filterPayload.status = status
-    }
-
-    if (priority) {
-      filterPayload.priority = priority
-    }
+    const filterPayload = buildFilter<FilterPayloadType>({
+      status,
+      priority,
+      createdAt: startDate && endDate ? dateRange : undefined,
+      dueDate: dueStartDate && dueEndDate ? dueDateRange : undefined,
+    });
 
     const tasks = await this.taskModel.find({
       ...filterPayload,

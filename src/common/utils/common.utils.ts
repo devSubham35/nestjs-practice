@@ -33,3 +33,17 @@ export const getDateRange = (startDate?: string, endDate?: string) => {
 
   return dateRange;
 };
+
+type FilterConfig<T> = {
+  [K in keyof T]?: T[K] | undefined;
+};
+
+export function buildFilter<T extends object>(
+  filters: FilterConfig<T>,
+): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(filters).filter(
+      ([, value]) => value !== undefined && value !== null,
+    ),
+  ) as Partial<T>;
+}
