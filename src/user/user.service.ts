@@ -49,6 +49,6 @@ export class UserService {
             ? { name: { $regex: name, $options: 'i' } }
             : {};
 
-        return await this.userModel.find(filter)
+        return await this.userModel.find(filter).select('_id name email')
     }
 }

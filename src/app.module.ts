@@ -9,6 +9,8 @@ import { AuthGuard } from './auth/guards/auth.guard';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import { ProjectModule } from './project/project.module';
+import { TaskModule } from './task/task.module';
+import { CounterModule } from './counter/counter.module';
 
 @Module({
   imports: [
@@ -17,6 +19,8 @@ import { ProjectModule } from './project/project.module';
     AuthModule,
     MongooseModule.forRoot(process.env.MONGODB_URL!),
     ProjectModule,
+    TaskModule,
+    CounterModule,
   ],
   controllers: [AppController],
   providers: [

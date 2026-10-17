@@ -1,4 +1,4 @@
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Project } from './schemas/project.schema';
 import { GetProjectsDto } from './dto/get-project.dto';
@@ -25,6 +25,7 @@ export class ProjectService {
       ownerId: userId,
       name: createProjectDto.name,
       description: createProjectDto.description,
+      members: [userId, ...(createProjectDto.members ?? [])],
     };
 
     if (createProjectDto.status) {
@@ -78,14 +79,19 @@ export class ProjectService {
   /// Find project by id
   //////////////////////////////////////////////////////////
 
-  async findOne(userId: string, id: string) {
+  async findOne({ userId, id }:{userId?: string, id: string}) {
+
+    const query: Record<string, unknown> = {
+      _id: id,
+      isDeleted: false,
+    }
+
+    if(userId){
+      query.ownerId = userId
+    }
 
     const project = await this.projectModel
-      .findOne({
-        _id: id,
-        ownerId: userId,
-        isDeleted: false,
-      })
+      .findOne(query)
       .lean()
       .exec()
 

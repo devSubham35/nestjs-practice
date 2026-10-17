@@ -3,34 +3,10 @@ import { GetProjectsDto } from './dto/get-project.dto';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { UserId } from 'src/common/decorator/common.decorator';
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ValidateObjectIdPipe } from 'src/common/pipes/validate-object-id/validate-object-id.pipe';
-import {
-  ApiBadRequestResponse,
-  ApiBearerAuth,
-  ApiCreatedResponse,
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiParam,
-  ApiTags,
-  ApiUnauthorizedResponse,
-} from '@nestjs/swagger';
-import {
-  errorResponse,
-  PROJECT_EXAMPLE,
-  successResponse,
-  SWAGGER_IDS,
-} from 'src/common/swagger/swagger.examples';
+import { errorResponse, PROJECT_EXAMPLE, successResponse, SWAGGER_IDS } from 'src/common/swagger/swagger.examples';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
 @ApiTags('Projects')
 @ApiBearerAuth()
@@ -38,6 +14,7 @@ import {
   description: 'A valid bearer token was not supplied.',
   example: errorResponse(401, 'Unauthorized'),
 })
+
 @Controller('projects')
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
@@ -113,7 +90,10 @@ export class ProjectController {
     @Param('id', ValidateObjectIdPipe) id: string,
     @UserId() userId: string,
   ) {
-    return this.projectService.findOne(userId, id);
+    return this.projectService.findOne({
+      id,
+      userId
+    });
   }
 
   @Patch(':id')

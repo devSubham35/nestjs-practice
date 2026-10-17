@@ -1,13 +1,16 @@
-import { PROJECT_STATUS } from '../project.types';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsArray,
   IsEnum,
+  IsMongoId,
   IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+import { PROJECT_STATUS } from '../project.types';
 
 export class CreateProjectDto {
   @ApiProperty({
@@ -42,4 +45,14 @@ export class CreateProjectDto {
   @IsOptional()
   @IsEnum(PROJECT_STATUS)
   status?: PROJECT_STATUS;
+
+  @ApiPropertyOptional({
+    description: 'MongoDB IDs of users who belong to the project',
+    type: [String],
+    example: ['507f1f77bcf86cd799439011'],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  members?: string[];
 }

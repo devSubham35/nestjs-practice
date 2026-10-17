@@ -20,7 +20,18 @@ export class Project {
   })
   ownerId!: Types.ObjectId;
 
-  @Prop({ type: String, enum: PROJECT_STATUS, default: PROJECT_STATUS.ACTIVE })
+  @Prop({
+    ref: 'User',
+    default: [],
+    type: [Types.ObjectId],
+  })
+  members!: Types.ObjectId[];
+
+  @Prop({ 
+    type: String, 
+    enum: PROJECT_STATUS, 
+    default: PROJECT_STATUS.ACTIVE 
+  })
   status?: PROJECT_STATUS;
 
   @Prop({ default: false })
