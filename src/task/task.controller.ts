@@ -6,16 +6,6 @@ import { UserId } from 'src/common/decorator/common.decorator';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ValidateObjectIdPipe } from 'src/common/pipes/validate-object-id/validate-object-id.pipe';
 
-/*
-
-- filter by multiple projects
-- filter by status
-- filter by priorities
-- filter by date range
-- Add pagination
-
-*/
-
 @Controller('projects/:projectId/tasks')
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}

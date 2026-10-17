@@ -5,19 +5,24 @@ import { Counter } from './schemas/counter.schema';
 
 @Injectable()
 export class CounterService {
+  constructor(
+    @InjectModel(Counter.name) private counterModel: Model<Counter>,
+  ) {}
 
-    constructor(@InjectModel(Counter.name) private counterModel: Model<Counter>) {}
+  //////////////////////////////////////////////////////////
+  /// Get the next counter sequence
+  //////////////////////////////////////////////////////////
 
-    async getNextSequence(name: string): Promise<number> {
-        const counter = await this.counterModel.findOneAndUpdate(
-            { name },
-            { $inc: { seq: 1 } },
-            {
-                new: true,
-                upsert: true,
-            },
-        );
+  async getNextSequence(name: string): Promise<number> {
+    const counter = await this.counterModel.findOneAndUpdate(
+      { name },
+      { $inc: { seq: 1 } },
+      {
+        new: true,
+        upsert: true,
+      },
+    );
 
-        return counter.seq;
-    }
+    return counter.seq;
+  }
 }

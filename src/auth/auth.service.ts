@@ -17,7 +17,10 @@ export class AuthService {
     private readonly tokenService: TokenService,
   ) {}
 
-  /// Format user response without password
+  //////////////////////////////////////////////////////////
+  /// Build the authentication token payload
+  //////////////////////////////////////////////////////////
+
   private toTokenPayload(user: UserDocument): AuthenticatedUser {
     return {
       sub: user._id.toString(),
@@ -28,7 +31,10 @@ export class AuthService {
     };
   }
 
-  /// Signup Service
+  //////////////////////////////////////////////////////////
+  /// Register a new user
+  //////////////////////////////////////////////////////////
+
   async signup(signupDto: SignUpDto) {
     const isExistingUser = await this.userService.findByEmail(signupDto.email);
 
@@ -55,7 +61,10 @@ export class AuthService {
     };
   }
 
-  /// Signin Service
+  //////////////////////////////////////////////////////////
+  /// Sign in a user
+  //////////////////////////////////////////////////////////
+
   async signin(signinDto: SignInDto) {
     const existingUser = await this.userService.findByEmail(signinDto.email);
 
@@ -85,7 +94,10 @@ export class AuthService {
     };
   }
 
-  /// User profile service
+  //////////////////////////////////////////////////////////
+  /// Get the authenticated user profile
+  //////////////////////////////////////////////////////////
+
   async profile(id: string) {
     const user = await this.userService.findById(id);
 
